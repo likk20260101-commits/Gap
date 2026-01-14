@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人飲控系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <style>
+        /* 這裡可以自定義你的介面風格，例如北歐簡約風 */
+        :root { --main-bg: #f0f2f5; --card-bg: #ffffff; --primary: #2ecc71; }
+        body { font-family: sans-serif; background: var(--main-bg); margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        .dashboard { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        .history-section { margin-top: 20px; background: white; border-radius: 15px; padding: 15px; }
+        .btn { border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; color: white; margin: 5px; }
+        .btn-add { background: var(--primary); }
+        .btn-water { background: #3498db; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="dashboard">
+        <h2>今日狀態</h2>
+        <canvas id="dailyChart" width="200" height="200"></canvas>
+        <div id="statusText" style="margin-top: 15px; font-weight: bold;"></div>
+        <hr>
+        <div class="actions">
+            <button class="btn btn-add" onclick="updateKcal(100)">+100 kcal</button>
+            <button class="btn btn-add" onclick="updateKcal(500)">+500 kcal</button>
+            <button class="btn btn-water" onclick="updateWater(0.3)">+300ml 水</button>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3>歷史記錄 (最近 7 天)</h3>
+        <ul id="historyList" style="list-style: none; padding: 0;"></ul>
+    </div>
+</div>
+
+<script>
+    // 系統邏輯核心
+    let state = {
+        goal: 1800,
+        consumed: 0,
+        water: 0,
+        history: []
+    };
+
+    function initSystem() {
+        const saved = localStorage.getItem('diet_system_data');
+        if (saved) state = JSON.parse(saved);
+        
+        checkDateReset();
+        renderUI();
+    }
+
+    function updateKcal(val) {
+        state.consumed += val;
+        saveAndRefresh();
+    }
+
+    function updateWater(val) {
+        state.water += val;
+        saveAndRefresh();
+    }
+
+    function saveAndRefresh() {
+        localStorage.setItem('diet_system_data', JSON.stringify(state));
+        renderUI();
+    }
+
+    function renderUI() {
+        document.getElementById('statusText').innerText = 
+            `已攝取: ${state.consumed} / 目標: ${state.goal} kcal | 水: ${state.water.toFixed(1)}L`;
+        renderChart();
+        renderHistory();
+    }
+
+    // 這裡使用 Chart.js 畫出專業的圓餅圖
+    function renderChart() {
+        // 圖表更新邏輯...
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = state.history.slice(-7).map(h => 
+            `<li style="border-bottom: 1px solid #eee; padding: 5px 0;">${h.date}: ${h.kcal} kcal</li>`).join('');
+    }
+
+    initSystem();
+</script>
+</body>
+</html>
